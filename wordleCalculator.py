@@ -503,17 +503,6 @@ def getNextWord(resultsArr, validGuess, validAnswer):
         result = info[1]
         guess = str(info[0]).lower()
         validAnswer = getPossibleAnswers(validAnswer, guess, result)
-    
-    # if len(resultsArr) == 1 and len(validAnswer) > 10:
-    #     firstResultFile = open('beginning_roate.txt', 'r')
-    #     firstResult = firstResultFile.read().split('\n')
-    #     firstResultFile.close()
-    #     result = resultsArr[0][1]
-
-    #     line = firstResult[result[4] + result[3] * 3 + result[2] * 9 + result[1] * 27 + result[0] * 81]
-    #     guess = line[-5:]
-    #     # print("used save")
-    #     return guess
 
     optimalGuesses = validGuess
     optimalGuesses = widdle(validAnswer, validGuess, resultsArr)

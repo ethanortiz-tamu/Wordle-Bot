@@ -17,3 +17,10 @@ Average Guesses: 3.469546436285097
 Average Time: 0.29153697609129015
 
 
+
+
+crate
+
+Total Time: 3550.5876126289368
+Average Guesses: 3.4682505399568035
+Average Time: 1.5337311501636877
