@@ -1,0 +1,19 @@
+roate
+
+Total Time: 674.274177312851
+Average Guesses: 3.5032397408207343
+Average Time: 0.2912631435476678
+
+trace
+
+Total Time: 54.31579065322876
+Average Guesses: 3.4613390928725702
+Average Time: 0.023462544558630134
+
+salet
+
+Total Time: 674.9080996513367
+Average Guesses: 3.469546436285097
+Average Time: 0.29153697609129015
+
+
