@@ -165,6 +165,44 @@ def widdle(validAnswers, validGuesses, results):
     # print("Widdled! Down to", len(ret), "from",len(validGuess))
     return ret
 
+# eliminates more strictly based on letter frequency in remaining answers
+# this function sometimes breaks im not sure why so im not using it anymore
+def widdleMore(validAnswers, validGuesses):
+    letterFreq = {'a': 0, 'b': 0, 'c': 0, 'd': 0, 'e': 0, 'f': 0, 'g': 0, 'h': 0, 'i': 0, 'j': 0, 'k': 0, 'l': 0,
+                  'm': 0, 'n': 0, 'o': 0, 'p': 0, 'q': 0, 'r': 0, 's': 0, 't': 0, 'u': 0, 'v': 0, 'w': 0,
+                  'x': 0, 'y': 0, 'z': 0}
+    for answer in validAnswers:
+        for letter in answer:
+            letterFreq[letter] += 1
+    least = 13000
+    worst = ''
+    for letter, val in letterFreq.items():
+        if val < least and val != 0:
+            least = val
+            worst = letter
+    ret = []
+    for word in validGuesses:
+        if worst not in word:
+            ret += [word]
+    used = [worst]
+    while len(ret) > 700:
+        least = 13000
+        nworst = ''
+        for letter, val in letterFreq.items():
+            if val < least and val != 0 and letter not in used:
+                least = val
+                nworst = letter
+        ret2 = []
+        for word in ret:
+            if nworst not in word:
+                ret2 += [word]
+        used += [nworst]
+        if len(ret2) == 0:
+            return ret
+        ret = ret2
+    # print("Widdled More! Down to", len(ret), "from",len(validGuess))
+    return ret
+
 def scoreAnswers2(validGuess, validAnswer):
     max_score = 0
     max_word = ""
