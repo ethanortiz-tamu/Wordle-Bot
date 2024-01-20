@@ -16,11 +16,62 @@ Total Time: 674.9080996513367
 Average Guesses: 3.469546436285097
 Average Time: 0.29153697609129015
 
+trace (with new strategy and widdle)
 
+Total Time: 58.467610597610474
+Average Guesses: 3.4526997840172786
+Average Time: 0.02525598729918379
 
+trace (with new strategy and no widdle)
 
-crate
+Total Time: 121.24094295501709
+Average Guesses: 3.4561555075593953
+Average Time: 0.052371897604759
 
-Total Time: 3550.5876126289368
-Average Guesses: 3.4682505399568035
-Average Time: 1.5337311501636877
+crate (with new strategy and no widdle)
+
+Total Time: 145.20627403259277
+Average Guesses: 3.4630669546436286
+Average Time: 0.0627240924546837
+
+crate (with new strategy and widdle)
+
+Total Time: 62.45766496658325
+Average Guesses: 3.461771058315335
+Average Time: 0.026979552901331857
+
+roate (with new strategy and widdle)
+
+Total Time: 84.31213641166687
+Average Guesses: 3.4846652267818574
+Average Time: 0.03641992933549325
+
+trace (with new strategy and widdle + range 10)
+
+Total Time: 58.49028396606445
+Average Guesses: 3.467386609071274
+Average Time: 0.025265781410826978
+
+trace (with new strategy and widdle + range 3)
+
+Total Time: 61.087307929992676
+Average Guesses: 3.4526997840172786
+Average Time: 0.026387606017275453
+
+trace (with new strategy and widdle + range 4)
+
+Total Time: 62.005269050598145
+Average Guesses: 3.4518358531317497
+Average Time: 0.026784133499178464
+
+trace (with new strategy and widdle + dynamic range (4))
+
+Total Time: 59.721516847610474
+Average Guesses: 3.441036717062635
+Average Time: 0.025797631467650312
+
+trace (with new strategy and widdle + dynamic range (3))
+
+Total Time: 58.13902688026428
+Average Guesses: 3.4362850971922247
+Average Time: 0.02511405048823511

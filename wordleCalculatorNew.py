@@ -63,7 +63,7 @@ def cache_storage(storage_path):
 
 # returns the result of a guess answer pair
 
-@cache_storage(storage_path="/test")
+# @cache_storage(storage_path="/test")
 def wordleResult(guess, answer):
     result = [0,0,0,0,0]
     i = 0
@@ -165,13 +165,30 @@ def widdle(validAnswers, validGuesses, results):
     # print("Widdled! Down to", len(ret), "from",len(validGuess))
     return ret
 
+def scoreAnswers2(validGuess, validAnswer):
+    max_score = 0
+    max_word = ""
+
+    for word in validGuess:
+        s = set()
+        for answer in validAnswer:
+            s.add(wordleResult(word, answer))
+        if len(s) > max_score:
+            max_score = len(s)
+            max_word = word
+        elif len(s) == max_score and word in validAnswer:
+            max_score = len(s)
+            max_word = word
+    return max_word
+
+
 def runCalc(validAnswer, validGuesses, secretAnswer, startingWord):
     # print("Guessing:", startingWord)
     resultsArr = [(startingWord, wordleResult(startingWord, secretAnswer))]
     turns = 1
 
     while resultsArr[-1][1] != (2,2,2,2,2):
-        currGuess = getNextWord(tuple(resultsArr), validGuesses, validAnswer)
+        currGuess = getNextWord2(tuple(resultsArr), validGuesses, validAnswer)
         # print("Guessing: " + currGuess)
         resultsArr += [(currGuess, wordleResult(currGuess, secretAnswer))]
         turns += 1
@@ -197,53 +214,66 @@ def getNextWord(resultsArr, validGuess, validAnswer):
     guess = bestScore
     return guess
 
+@cache_storage(storage_path="cache/dynamic2")
+def getNextWord2(resultsArr, validGuess, validAnswer):
+    validAnswer = list(validAnswer)
+    validGuess = list(validGuess)
+    key = []
+    for info in resultsArr:
+        key += [info[1]]
+        result = info[1]
+        guess = str(info[0]).lower()
+        validAnswer = getPossibleAnswers(validAnswer, guess, result)
 
-# get list of words and format them
-# get starting outcomes for roate
-validGuessFile = open('validGuess.txt', 'r')
-validAnswerFile = open('validAnswer.txt', 'r')
-validGuess = tuple(validGuessFile.read().split('\n'))
-validAnswer = validAnswerFile.read().split('\n')
-validAnswerFile.close()
-validGuessFile.close()
+    optimalGuesses = validGuess
+    optimalGuesses = widdle(validAnswer, validGuess, resultsArr)
+    if (len(validAnswer) > 3):
+        bestScore = scoreAnswers2(optimalGuesses, validAnswer)
+    else:
+        bestScore = scoreAnswers2(validAnswer, validAnswer)
 
-words = []
+    guess = bestScore
+    return guess
 
-for word in validGuess:
-    s = set()
+def startingWord(sword):
+    # get list of words and format them
+    # get starting outcomes for roate
+    validGuessFile = open('validGuess.txt', 'r')
+    validAnswerFile = open('validAnswer.txt', 'r')
+    validGuess = tuple(validGuessFile.read().split('\n'))
+    validAnswer = validAnswerFile.read().split('\n')
+    validAnswerFile.close()
+    validGuessFile.close()
+    average = 0
+    i = 0
+    start = time.time()
     for answer in validAnswer:
-        s.add(wordleResult(word, answer))
-    words += [(word, len(s))]
-    
-    
-print(sorted(words, key=lambda x: x[1]))
+        i += 1
+        print(f"Word: {answer}")
+        last = runCalc(tuple(validAnswer), validGuess, answer, sword)
+        average += last
+        print(f"Guesses: {last}")
+        print()
+
+    end = time.time()
+
+    sfile = open("starting_words.txt", "a+")
+    sfile.write("\n")
+    sfile.write(sword)
+    sfile.write("\n\n")
+    sfile.write(f"Total Time: {end - start}\n")
+    average = average / (i * 1.0)
+    sfile.write(f'Average Guesses: {average}\n')
+    sfile.write(f'Average Time: {(end - start) / (i * 1.0)}\n')
+    sfile.close()
+
 
 # cached_my_function = cache_function_output(storage_path="/test")(getNextWord)
 # cached_my_function.remove_cache((('trace', (0, 0, 2, 1, 0)), ('cable', (2, 1, 0, 1, 0))))
 
 sword = ""
 while len(sword) != 5:
-    sword = input("Starting Word:")
+    sword = input("Starting Word: ")
+print()
 
-average = 0
-i = 0
-start = time.time()
-for answer in validAnswer:
-    i += 1
-    print(f"Word: {answer}")
-    last = runCalc(tuple(validAnswer), validGuess, answer, sword)
-    average += last
-    print(f"Guesses: {last}")
-    print()
-
-end = time.time()
-
-sfile = open("starting_words.txt", "a+")
-sfile.write("\n\n")
-sfile.write(sword)
-sfile.write("\n\n")
-sfile.write(f"Total Time: {end - start}\n")
-average = average / (i * 1.0)
-sfile.write(f'Average Guesses: {average}\n')
-sfile.write(f'Average Time: {(end - start) / (i * 1.0)}\n')
-sfile.close()
+startingWord(sword)
