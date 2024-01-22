@@ -10,7 +10,7 @@ def cache_storage(storage_path):
         @wraps(func)
         def wrapper(*args, **kwargs):
             # Use a tuple of arguments and keyword arguments as the cache key
-            key = args[0] if args else None 
+            key = tuple(args[0]) if args else None 
             
             # Create the storage directory if it doesn't exist
             os.makedirs(storage_path, exist_ok=True)
@@ -62,8 +62,6 @@ def cache_storage(storage_path):
     return decorator
 
 # returns the result of a guess answer pair
-
-# @cache_storage(storage_path="/test")
 def wordleResult(guess, answer):
     result = [0,0,0,0,0]
     i = 0
@@ -219,6 +217,21 @@ def scoreAnswers2(validGuess, validAnswer):
             max_word = word
     return max_word
 
+def scoreAnswers3(validGuess, validAnswer):
+    scores = []
+
+    for word in validGuess:
+        s = set()
+        for answer in validAnswer:
+            s.add(wordleResult(word, answer))
+        scores.append((word, len(s)))
+
+    # Sort the scores in descending order
+    scores.sort(key=lambda x: (x[1], x[0] in validAnswer), reverse=True)
+
+    # Return the top 3 words
+    top_words = [word for word, _ in scores[:5]]
+    return top_words
 
 def runCalc(validAnswer, validGuesses, secretAnswer, startingWord):
     # print("Guessing:", startingWord)
@@ -232,7 +245,19 @@ def runCalc(validAnswer, validGuesses, secretAnswer, startingWord):
         turns += 1
     return turns
 
-@cache_storage(storage_path="/test")
+def runCalcFromTree(validAnswer, validGuesses, secretAnswer):
+    # print("Guessing:", startingWord)
+    resultsArr = []
+    turns = 0
+    while len(resultsArr) == 0 or resultsArr[-1][1] != (2,2,2,2,2):
+        info = treeTreversal(resultsArr, validGuesses, validAnswer)
+        currGuess = info[0]
+        print("Guessing: " + currGuess)
+        resultsArr += [(currGuess, wordleResult(currGuess, secretAnswer))]
+        turns += 1
+    return turns
+
+@cache_storage(storage_path="cache/old")
 def getNextWord(resultsArr, validGuess, validAnswer):
     validAnswer = list(validAnswer)
     validGuess = list(validGuess)
@@ -252,7 +277,7 @@ def getNextWord(resultsArr, validGuess, validAnswer):
     guess = bestScore
     return guess
 
-@cache_storage(storage_path="cache/dynamic2")
+# @cache_storage(storage_path="cache/tree")
 def getNextWord2(resultsArr, validGuess, validAnswer):
     validAnswer = list(validAnswer)
     validGuess = list(validGuess)
@@ -273,7 +298,28 @@ def getNextWord2(resultsArr, validGuess, validAnswer):
     guess = bestScore
     return guess
 
-def startingWord(sword):
+def getNextWords(resultsArr, validGuess, validAnswer):
+    validAnswer = list(validAnswer)
+    validGuess = list(validGuess)
+    key = []
+    for info in resultsArr:
+        key += [info[1]]
+        result = info[1]
+        guess = str(info[0]).lower()
+        validAnswer = getPossibleAnswers(validAnswer, guess, result)
+
+    optimalGuesses = validGuess
+    # optimalGuesses = widdle(validAnswer, validGuess, resultsArr)
+    if (len(validAnswer) > 3):
+        bestScore = scoreAnswers3(optimalGuesses, validAnswer)
+    else:
+        bestScore = [scoreAnswers2(validAnswer, validAnswer)]
+
+    guess = bestScore
+    return guess
+
+def startingWord():
+    
     # get list of words and format them
     # get starting outcomes for roate
     validGuessFile = open('validGuess.txt', 'r')
@@ -282,6 +328,13 @@ def startingWord(sword):
     validAnswer = validAnswerFile.read().split('\n')
     validAnswerFile.close()
     validGuessFile.close()
+
+    
+    sword = ""
+    while sword not in validGuess:
+        sword = input("Starting Word: ")
+    print()
+
     average = 0
     i = 0
     start = time.time()
@@ -305,13 +358,115 @@ def startingWord(sword):
     sfile.write(f'Average Time: {(end - start) / (i * 1.0)}\n')
     sfile.close()
 
+def runAll():
+    
+    # get list of words and format them
+    # get starting outcomes for roate
+    validGuessFile = open('validGuess.txt', 'r')
+    validAnswerFile = open('validAnswer.txt', 'r')
+    validGuess = tuple(validGuessFile.read().split('\n'))
+    validAnswer = validAnswerFile.read().split('\n')
+    validAnswerFile.close()
+    validGuessFile.close()
+
+    average = 0
+    i = 0
+    start = time.time()
+    sword = ""
+    for answer in validAnswer:
+        i += 1
+        print(f"Word: {answer}")
+        last = runCalcFromTree(validAnswer, validGuess, answer)
+        average += last
+        print(f"Guesses: {last}")
+        print()
+
+    end = time.time()
+
+    sfile = open("starting_words.txt", "a+")
+    sfile.write("\n")
+    sfile.write(sword)
+    sfile.write("\n\n")
+    sfile.write(f"Total Time: {end - start}\n")
+    average = average / (i * 1.0)
+    sfile.write(f'Average Guesses: {average}\n')
+    sfile.write(f'Average Time: {(end - start) / (i * 1.0)}\n')
+    sfile.close()
+
+@cache_storage("cache/tree")
+def treeTreversal(resultsArr, validGuess, validAnswer, sword=""):
+    # if len(resultsArr) == 0 and sword != "":
+    #     currGuesses = [sword]
+    # else:
+    currGuesses = getNextWords(tuple(resultsArr), validGuess, validAnswer)
+    validAnswer2 = list(validAnswer)
+    key = []
+    for info in resultsArr:
+        key += [info[1]]
+        result = info[1]
+        guess = str(info[0]).lower()
+        validAnswer2 = getPossibleAnswers(validAnswer2, guess, result)
+    min_total = -1
+    min_guess = ""
+    for currGuess in currGuesses:
+        possibleResults = set()
+        for answer in validAnswer2:
+            possibleResults.add(wordleResult(currGuess, answer))
+        total = 0
+        for result in possibleResults:
+            resultsArr += [(currGuess, result)]
+            if result == (2,2,2,2,2):
+                f = open("test.txt", "a")
+                f.write(currGuess + "\n")
+                f.close()
+                total += len(resultsArr)
+            else:
+                total += treeTreversal(resultsArr, validGuess, validAnswer)[1]
+            resultsArr.pop()
+        if total < min_total or min_total == -1:
+            min_total = total
+            min_guess = currGuess
+    return (min_guess, min_total)
+
+def startTreeTreversal():
+    # get list of words and format them
+    # get starting outcomes for roate
+    validGuessFile = open('validGuess.txt', 'r')
+    validAnswerFile = open('validAnswer.txt', 'r')
+    validGuess = tuple(validGuessFile.read().split('\n'))
+    validAnswer = validAnswerFile.read().split('\n')
+    validAnswerFile.close()
+    validGuessFile.close()
+
+    sword = ""
+    # while sword not in validGuess:
+    #     sword = input("Starting Word: ")
+    # print()
+
+    average = 0
+    i = 0
+    start = time.time()
+
+    total = treeTreversal([], validGuess, validAnswer, sword)
+
+    end = time.time()
+
+    print("Time:", end - start)
+    print(total[1] / len(validAnswer))
+
+    # sfile = open("starting_words.txt", "a+")
+    # sfile.write("\n")
+    # sfile.write(sword)
+    # sfile.write("\n\n")
+    # sfile.write(f"Total Time: {end - start}\n")
+    # average = average / (i * 1.0)
+    # sfile.write(f'Average Guesses: {average}\n')
+    # sfile.write(f'Average Time: {(end - start) / (i * 1.0)}\n')
+    # sfile.close()
+
+
 
 # cached_my_function = cache_function_output(storage_path="/test")(getNextWord)
 # cached_my_function.remove_cache((('trace', (0, 0, 2, 1, 0)), ('cable', (2, 1, 0, 1, 0))))
 
-sword = ""
-while len(sword) != 5:
-    sword = input("Starting Word: ")
-print()
-
-startingWord(sword)
+runAll()

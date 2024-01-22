@@ -75,3 +75,39 @@ trace (with new strategy and widdle + dynamic range (3))
 Total Time: 58.13902688026428
 Average Guesses: 3.4362850971922247
 Average Time: 0.02511405048823511
+
+trace (from cache)
+
+Total Time: 17.29136824607849
+Average Guesses: 3.4362850971922247
+Average Time: 0.007469273540422675
+
+adieu
+
+Total Time: 80.78408765792847
+Average Guesses: 3.626781857451404
+Average Time: 0.03489593419348962
+
+crate
+
+Total Time: 96.14578938484192
+Average Guesses: 3.4397408207343414
+Average Time: 0.04153165848157318
+
+salet
+
+Total Time: 110.05801606178284
+Average Guesses: 3.4293736501079914
+Average Time: 0.04754125963791915
+
+salet
+
+Total Time: 447.93212938308716
+Average Guesses: 3.422462203023758
+Average Time: 0.19349120059744584
+
+salet (final)
+
+Total Time: 27.35638999938965
+Average Guesses: 3.422462203023758
+Average Time: 0.011817015118526846
